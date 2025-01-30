@@ -137,11 +137,10 @@ if "messages" not in st.session_state:
 
 # Header with Sarvodaya styling and logo
 st.image("logo.png", width=300)
-st.title("Sarvodaya Finance Virtual Assistant")
+st.title("Sarvodaya Finance Investor Assistant")
 st.markdown("""
     <div style='background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;'>
-        Welcome to Sarvodaya Finance's AI Assistant. I'm here to help you with information about our financial services, 
-        products, and company information.
+        Welcome to Sarvodaya Finance's AI-Powered Investor Assistant. I'm here to help you with information about our financial and business performance. 
     </div>
 """, unsafe_allow_html=True)
 
@@ -154,7 +153,7 @@ st.markdown("""
 
 # Sample prompts with improved styling
 sample_prompts = [
-    "Give me an overview of loan growth during the financial year",
+    "Give me an overview of the loan growth during FY2024",
     "Provide me an analysis of the asset quality",
     "How is the overall profitability of the company"
 ]
