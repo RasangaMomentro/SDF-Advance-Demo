@@ -115,21 +115,31 @@ def run_flow(message: str,
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}
 
-def get_assistant_response(prompt):
-    """Helper function to get assistant response"""
+def process_prompt(prompt):
+    """Helper function to process prompts and get responses"""
+    if not prompt:
+        return
+    
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    # Get bot response
     response = run_flow(prompt)
     try:
         if isinstance(response, dict):
-            return (response.get('outputs', [])[0]
-                    .get('outputs', [])[0]
-                    .get('results', {})
-                    .get('message', {})
-                    .get('data', {})
-                    .get('text', 'No response received'))
+            message = (response.get('outputs', [])[0]
+                      .get('outputs', [])[0]
+                      .get('results', {})
+                      .get('message', {})
+                      .get('data', {})
+                      .get('text', 'No response received'))
+            
+            st.session_state.messages.append({"role": "assistant", "content": message})
         else:
-            return "I apologize, but I couldn't process your request at the moment."
+            st.error("I apologize, but I couldn't process your request at the moment.")
     except Exception as e:
-        return f"I apologize, but something went wrong. Please try again. Error: {str(e)}"
+        st.error("I apologize, but something went wrong. Please try again.")
+        st.write("Technical details:", str(e))
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -137,10 +147,11 @@ if "messages" not in st.session_state:
 
 # Header with Sarvodaya styling and logo
 st.image("logo.png", width=300)
-st.title("Sarvodaya Finance Investor Assistant")
+st.title("Sarvodaya Finance Virtual Assistant")
 st.markdown("""
     <div style='background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;'>
-        Welcome to Sarvodaya Finance's AI-Powered Investor Assistant. I'm here to help you with information about our financial and business performance. 
+        Welcome to Sarvodaya Finance's AI Assistant. I'm here to help you with information about our financial services, 
+        products, and company information.
     </div>
 """, unsafe_allow_html=True)
 
@@ -153,7 +164,7 @@ st.markdown("""
 
 # Sample prompts with improved styling
 sample_prompts = [
-    "Give me an overview of the loan growth during FY2024",
+    "Give me an overview of loan growth during the financial year",
     "Provide me an analysis of the asset quality",
     "How is the overall profitability of the company"
 ]
@@ -162,14 +173,9 @@ sample_prompts = [
 col1, col2, col3 = st.columns(3)
 for col, prompt in zip([col1, col2, col3], sample_prompts):
     if col.button(prompt, key=f"sample_{prompt}", help=f"Click to ask about {prompt}"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("assistant"):
-            with st.spinner("Processing your request..."):
-                response = get_assistant_response(prompt)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                st.experimental_rerun()
+        process_prompt(prompt)
 
-# Display chat history with custom styling
+# Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(f"""
@@ -180,12 +186,7 @@ for message in st.session_state.messages:
 
 # Chat input
 if prompt := st.chat_input("How can I help you today?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("assistant"):
-        with st.spinner("Processing your request..."):
-            response = get_assistant_response(prompt)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            st.experimental_rerun()
+    process_prompt(prompt)
 
 # Footer with Sarvodaya styling
 st.markdown("---")
