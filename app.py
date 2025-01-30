@@ -140,7 +140,7 @@ col1, col2, col3 = st.columns(3)
 
 # Sample prompts with improved styling
 sample_prompts = [
-    "Give me an overview of loan growth during the financial year",
+    "Give me an overview of loan growth in FY2024",
     "Provide me an analysis of the asset quality",
     "How is the overall profitability of the company"
 ]
