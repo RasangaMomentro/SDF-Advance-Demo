@@ -121,10 +121,11 @@ if "messages" not in st.session_state:
 
 # Header with Sarvodaya styling and logo
 st.image("logo.png", width=300)
-st.title("Sarvodaya Development Finance Investor Assistant")
+st.title("Sarvodaya Finance Virtual Assistant")
 st.markdown("""
     <div style='background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;'>
-        Welcome to Sarvodaya Development Finance's AI-Powered Investor Assistant. I'm here to help you with information about our financial and business performance.
+        Welcome to Sarvodaya Finance's AI Assistant. I'm here to help you with information about our financial services, 
+        products, and company information.
     </div>
 """, unsafe_allow_html=True)
 
@@ -149,8 +150,34 @@ for col, prompt in zip([col1, col2, col3], sample_prompts):
     if col.button(prompt, key=f"sample_{prompt}", help=f"Click to ask about {prompt}"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
-        # Rerun the app to show the message and get response
-        st.rerun()
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Get bot response
+        with st.chat_message("assistant"):
+            with st.spinner("Processing your request..."):
+                response = run_flow(prompt)
+                try:
+                    # Navigate through the nested structure to get the message
+                    if isinstance(response, dict):
+                        # Extract message from the nested structure
+                        message = (response.get('outputs', [])[0]
+                                  .get('outputs', [])[0]
+                                  .get('results', {})
+                                  .get('message', {})
+                                  .get('data', {})
+                                  .get('text', 'No response received'))
+                        
+                        st.markdown(message)
+                        st.session_state.messages.append({"role": "assistant", "content": message})
+                    else:
+                        st.error("I apologize, but I couldn't process your request at the moment.")
+                        st.write("Technical details:", response)
+                except Exception as e:
+                    st.error("I apologize, but something went wrong. Please try again.")
+                    st.write("Technical details:", str(e))
 
 # Display chat history with custom styling
 for message in st.session_state.messages:
