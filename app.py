@@ -186,7 +186,34 @@ for message in st.session_state.messages:
 
 # Chat input
 if prompt := st.chat_input("How can I help you today?"):
-    process_prompt(prompt)
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    # Display user message
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Get bot response
+    with st.chat_message("assistant"):
+        with st.spinner("Processing your request..."):
+            response = run_flow(prompt)
+            try:
+                if isinstance(response, dict):
+                    message = (response.get('outputs', [])[0]
+                              .get('outputs', [])[0]
+                              .get('results', {})
+                              .get('message', {})
+                              .get('data', {})
+                              .get('text', 'No response received'))
+                    
+                    st.markdown(message)
+                    st.session_state.messages.append({"role": "assistant", "content": message})
+                else:
+                    st.error("I apologize, but I couldn't process your request at the moment.")
+                    st.write("Technical details:", response)
+            except Exception as e:
+                st.error("I apologize, but something went wrong. Please try again.")
+                st.write("Technical details:", str(e))
 
 # Footer with Sarvodaya styling
 st.markdown("---")
